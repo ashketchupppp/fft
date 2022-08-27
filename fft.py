@@ -1,8 +1,9 @@
-from operator import attrgetter
+import queue
 from vector import Vector
 
 class Character:
     def __init__(self, pos = None, hp = 30, atk = 10, move_range = 1, atk_range = 1, speed=1):
+        self.max_hp = hp
         self.hp = hp
         self.atk = atk
         self.move_range = move_range
@@ -53,7 +54,8 @@ class Map:
         return len(self.map)
 
 class Entities:
-    def __init__(self, entities):
+    def __init__(self, entities: list):
+        entities.sort(key=lambda e: e.speed, reverse=True)
         self.entities = entities
 
     def __getitem__(self, key):
@@ -67,13 +69,18 @@ class Entities:
     def __len__(self):
         return len(self.entities)
 
-    def sort_by_speed(self):
-        self.entities.sort(key=lambda e: e.speed)
+    def peek_next(self):
+        return self[0]
+
+    def next(self):
+        entity = self.entities[0]
+        self.entities.remove(entity)
+        self.entities.append(entity)
+        return entity
 
 class FFT:
     def __init__(self, map_w, map_h, entities):
         self.entities = Entities(entities)
-        self.entities.sort_by_speed()
         self.map = Map(map_w, map_h)
 
     def move_entity(self, entity, new_pos):
@@ -84,7 +91,12 @@ class FFT:
     def attack_entity(self, attacker, attackee):
         attacker.attack(attackee)
 
-#    def take_turn(self, action, args):
+    def take_turn(self, action, *args):
+        entity = self.entities.next()
+        if action == 'move':
+            self.move_entity(entity, *args)
+        elif action == 'attack':
+            self.attack_entity(entity, *args)
 
     def __str__(self):
         string = ''
