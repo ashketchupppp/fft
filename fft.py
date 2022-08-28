@@ -1,57 +1,5 @@
-import queue
-from vector import Vector
-
-class Character:
-    def __init__(self, pos = None, hp = 30, atk = 10, move_range = 1, atk_range = 1, speed=1):
-        self.max_hp = hp
-        self.hp = hp
-        self.atk = atk
-        self.move_range = move_range
-        self.atk_range = atk_range
-        self.pos = pos
-        self.speed = speed
-
-    def in_range(self, pos, _range):
-        return pos - self.pos <= _range
-    def can_move(self, new_pos):
-        return self.in_range(new_pos, self.move_range)
-
-    def can_attack(self, entity):
-        return self.in_range(entity.pos, self.atk_range)
-
-    def attack(self, other):
-        if type(other) != Character:
-            raise TypeError(f'invalid type {type(other)}')
-        if not self.can_attack(other):
-            raise Character.OutOfRange('character out of range')
-        other.hp -= self.atk
-
-    def move(self, pos):
-        if not self.can_move(pos):
-            raise Character.OutOfRange(f'{pos} out of move range')
-        self.pos = pos 
-
-    class OutOfRange(Exception): pass
-    class DiagonalMovementError(Exception): pass
-
-class Map:
-    def __init__(self, w, h):
-        self.w = w
-        self.h = h
-        self.map = []
-        for y in range(0, h):
-            self.map.append([])
-            for x in range(0, w):
-                self.map[y].append('.')
-
-    def __contains__(self, pos):
-        return 0 <= pos.y <= len(self.map[0]) and 0 <= pos.x <= len(self.map[0])
-
-    def __getitem__(self, key):
-        return self.map[key]
-
-    def __len__(self):
-        return len(self.map)
+from vector import Vec
+from map import Map
 
 class Entities:
     def __init__(self, entities: list):
@@ -61,7 +9,7 @@ class Entities:
     def __getitem__(self, key):
         if type(key) == int:
             return self.entities[key]
-        elif type(key) == Vector:
+        elif type(key) == Vec:
             for e in self.entities:
                 if e.pos == key:
                     return e
@@ -93,18 +41,35 @@ class FFT:
 
     def take_turn(self, action, *args):
         entity = self.entities.next()
+        available_actions = self.available_actions(entity)
+        if not action in available_actions:
+            raise FFT.UnavailableAction
         if action == 'move':
             self.move_entity(entity, *args)
         elif action == 'attack':
             self.attack_entity(entity, *args)
 
+    def entity_can_attack(self, entity):
+        for i in range(len(self.entities)):
+            if self.entities[i] != entity and entity.can_attack(self.entities[i]):
+                return True
+
+    def available_actions(self, entity):
+        available_actions = []
+        if 'move' in entity.actions:
+            available_actions.append('move')
+        if 'attack' in entity.actions and self.entity_can_attack(entity):
+            available_actions.append('attack')
+
+        return available_actions
+
     def __str__(self):
         string = ''
         for y in range(len(self.map)):
             for x in range(len(self.map[y])):
-                if self.entities[Vector(y, x)]:
+                if self.entities[Vec(y, x)]:
                     string += 'o/'
-                elif self.entities[0].can_move(Vector(y, x)):
+                elif self.entities[0].can_move(Vec(y, x)):
                     string += '# '
                 else:
                     string += self.map[y][x]
@@ -113,3 +78,4 @@ class FFT:
         return string
 
     class PositionOutsideMap(Exception): pass
+    class UnavailableAction(Exception): pass
