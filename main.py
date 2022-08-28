@@ -5,7 +5,7 @@ from fft import FFT
 from character import Character
 from vector import Vec
 
-from fftui import FFTUI
+from ui import FFTUI, Info
 
 entities = [
     Character(Vec(0, 0), speed=2),
@@ -15,8 +15,12 @@ entities = [
 game = FFT(10, 10, entities)
 
 class Main(App):
-    async def on_mount(self) -> None:
-        await self.view.dock(FFTUI(game), edge="top")
+    async def on_mount(self):
+        widgets = [
+            FFTUI(game),
+            Info(game)
+        ]
+        await self.view.dock(*widgets, edge="top")
 
 if __name__ == '__main__':
     main = Main(game)

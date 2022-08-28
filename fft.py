@@ -31,6 +31,9 @@ class FFT:
         self.entities = Entities(entities)
         self.map = Map(map_w, map_h)
 
+    def current_turns_entity(self):
+        return self.entities.peek_next()
+
     def move_entity(self, entity, new_pos):
         if not new_pos in self.map:
             raise FFT.PositionOutsideMap() 
@@ -69,8 +72,6 @@ class FFT:
             for x in range(len(self.map[y])):
                 if self.entities[Vec(y, x)]:
                     string += 'o/'
-                elif self.entities[0].can_move(Vec(y, x)):
-                    string += '# '
                 else:
                     string += self.map[y][x]
                     string += ' '
