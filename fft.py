@@ -27,7 +27,7 @@ class Entities:
         return entity
 
 class FFT:
-    def __init__(self, map_w, map_h, entities):
+    def __init__(self, map_w, map_h, entities: Entities):
         self.entities = Entities(entities)
         self.map = Map(map_w, map_h)
 
@@ -65,18 +65,6 @@ class FFT:
             available_actions.append('attack')
 
         return available_actions
-
-    def __str__(self):
-        string = ''
-        for y in range(len(self.map)):
-            for x in range(len(self.map[y])):
-                if self.entities[Vec(y, x)]:
-                    string += 'o/'
-                else:
-                    string += self.map[y][x]
-                    string += ' '
-            string += '\n'
-        return string
 
     class PositionOutsideMap(Exception): pass
     class UnavailableAction(Exception): pass

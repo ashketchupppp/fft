@@ -8,6 +8,9 @@ class Vec:
         self.x = x
         self.y = y
 
+    def dict(self):
+        return vars(self)
+
     def __str__(self):
         return f'({self.x}, {self.y})'
 

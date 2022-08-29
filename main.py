@@ -1,27 +1,72 @@
-from html import entities
 from textual.app import App
+from textual.widget import Widget
+from rich.panel import Panel
+from rich.columns import Columns
 
 from fft import FFT
 from character import Character
 from vector import Vec
-
 from ui import FFTUI, Info
 
-entities = [
-    Character(Vec(0, 0), speed=2),
-    Character(Vec(1, 1), speed=1)
-]
+def run_model():
+    def create_game():
+        entities = [
+            Character(Vec(9, 9)),
+            Character(Vec(1, 1))
+        ]
+        game = FFT(10, 10, entities)
+        return game
 
-game = FFT(10, 10, entities)
+    game = create_game()
+    replay = []
 
-class Main(App):
-    async def on_mount(self):
+    # set the game up to record all the game actions
+    def record(func):
+        def wrapper(*args):
+            replay.append(args)
+            func(*args)
+        return wrapper
+    
+    game.take_turn = record(game.take_turn)
+
+    # run the model here, interacting with the game
+    for i in range(5):
+        entity = game.current_turns_entity()
+        try:
+            game.take_turn('move', entity.pos + Vec(0, 1))
+        except:
+            pass
+
+    return (create_game(), replay)
+
+game, replay = run_model()
+
+class UIWidget(Widget):
+    def render(self):
         widgets = [
             FFTUI(game),
             Info(game)
         ]
-        await self.view.dock(*widgets, edge="top")
+        return Panel(Columns(widgets))
 
-if __name__ == '__main__':
-    main = Main(game)
-    Main.run()
+    async def on_mount(self):
+        self.set_interval(0.2, self.refresh)
+
+class UI(App):
+    def take_turn(self):
+        if not 'current_action' in vars(self):
+            self.current_action = 0
+        if not self.current_action >= len(replay):
+            try:
+                game.take_turn(*replay[self.current_action])
+            except FFT.PositionOutsideMap:
+                pass
+            self.current_action += 1
+
+    async def on_mount(self):
+        self.set_interval(0.2, self.take_turn)
+        await self.view.dock(UIWidget(game), edge="top")
+
+ui = UI()
+ui.run()
+print(replay)
