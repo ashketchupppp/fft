@@ -11,8 +11,8 @@ from ui import FFTUI, Info
 def run_model():
     def create_game():
         entities = [
-            Character(Vec(9, 9)),
-            Character(Vec(1, 1))
+            Character(Vec(1, 1), move_range=2),
+            Character(Vec(5, 5), move_range=2)
         ]
         game = FFT(10, 10, entities)
         return game
@@ -30,10 +30,10 @@ def run_model():
     game.take_turn = record(game.take_turn)
 
     # run the model here, interacting with the game
-    for i in range(5):
+    for i in range(10):
         entity = game.current_turns_entity()
         try:
-            game.take_turn('move', entity.pos + Vec(0, 1))
+            game.take_turn('move', entity.pos + Vec(1, 1))
         except:
             pass
 
@@ -64,7 +64,7 @@ class UI(App):
             self.current_action += 1
 
     async def on_mount(self):
-        self.set_interval(0.2, self.take_turn)
+        self.set_interval(1, self.take_turn)
         await self.view.dock(UIWidget(game), edge="top")
 
 ui = UI()

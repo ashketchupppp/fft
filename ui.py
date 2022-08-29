@@ -16,18 +16,22 @@ class FFTUI(Widget):
         row = self.fft.map[row_num].copy()
         for x in range(len(row)):
             # draw entity if there is one
-            if self.fft.entities[Vec(row_num, x)]:
+            tile_pos = Vec(row_num, x)
+            entity_at_tile = self.fft.entities[tile_pos]
+            current_entity = self.fft.current_turns_entity()
+
+            if current_entity.can_move(tile_pos):
+                row[x] = '#'
+
+            if entity_at_tile:
                 row[x] = 'o/'
 
             # otherwise just add a space to the tile string
             if len(row[x]) < 2:
                 row[x] += ' '
 
-            # stylise the current entity
-            row[x] = Text(row[x])
-            row[x].stylize("bold")
         row.insert(0, str(row_num) + ' ')
-        return ''.join([str(i) for i in row])
+        return ''.join(row)
 
     def render(self):
         rows = []
