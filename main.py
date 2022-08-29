@@ -6,12 +6,12 @@ from rich.columns import Columns
 from fft import FFT
 from character import Character
 from vector import Vec
-from ui import FFTUI, Info
+from ui import Map, Info
 
 def run_model():
     def create_game():
         entities = [
-            Character(Vec(1, 1), move_range=2),
+            Character(Vec(0, 0), move_range=2),
             Character(Vec(5, 5), move_range=2)
         ]
         game = FFT(10, 10, entities)
@@ -44,7 +44,7 @@ game, replay = run_model()
 class UIWidget(Widget):
     def render(self):
         widgets = [
-            FFTUI(game),
+            Map(game),
             Info(game)
         ]
         return Panel(Columns(widgets))

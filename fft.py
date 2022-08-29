@@ -1,3 +1,4 @@
+from character import Character
 from vector import Vec
 from map import Map
 
@@ -34,7 +35,7 @@ class FFT:
         self.entities = Entities(entities)
         self.map = Map(map_w, map_h)
 
-    def current_turns_entity(self):
+    def current_turns_entity(self) -> Character:
         return self.entities.peek_next()
 
     def move_entity(self, entity, new_pos):

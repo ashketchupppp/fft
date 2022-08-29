@@ -11,6 +11,9 @@ class Vec:
     def dict(self):
         return vars(self)
 
+    def copy(self):
+        return Vec(self.x, self.y)
+
     def __str__(self):
         return f'({self.x}, {self.y})'
 

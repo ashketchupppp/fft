@@ -32,8 +32,10 @@ class TestFFT(unittest.TestCase):
         entities = getEntities()
         game = getGame(entities)
         new_pos = Vec(0, 2)
+        original_pos = game.entities[0].pos.copy()
         with self.assertRaises(Character.OutOfRange):
             game.move_entity(game.entities[0], new_pos)
+        self.assertEqual(game.entities[0].pos, original_pos)
 
     def test_cannot_move_entity_outside_map(self):
         entities = getEntities()
