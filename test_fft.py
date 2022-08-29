@@ -74,6 +74,15 @@ class TestFFT(unittest.TestCase):
         self.assertEqual(game.available_actions(entities[0]), ['move'])
         self.assertEqual(game.available_actions(entities[1]), ['move', 'attack'])
          
+    def test_character_dies_when_hp_0_or_below(self):
+        entities = [
+            Character(pos=Vec(0, 0), atk_range=1, atk=5),
+            Character(pos=Vec(0, 1), hp=10)
+        ]
+        game = getGame(entities)
+        game.attack_entity(entities[0], entities[1])
+        game.attack_entity(entities[0], entities[1])
+        self.assertEqual(len(game.entities), 1)
 
 
 class TestCharacter(unittest.TestCase):

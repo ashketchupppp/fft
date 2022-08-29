@@ -69,4 +69,3 @@ class UI(App):
 
 ui = UI()
 ui.run()
-print(replay)

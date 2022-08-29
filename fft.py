@@ -26,6 +26,9 @@ class Entities:
         self.entities.append(entity)
         return entity
 
+    def kill(self, entity):
+        self.entities.remove(entity)
+
 class FFT:
     def __init__(self, map_w, map_h, entities: Entities):
         self.entities = Entities(entities)
@@ -41,6 +44,8 @@ class FFT:
 
     def attack_entity(self, attacker, attackee):
         attacker.attack(attackee)
+        if attackee.hp <= 0:
+            self.entities.kill(attackee)
 
     def take_turn(self, action, *args):
         entity = self.entities.next()
