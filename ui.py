@@ -102,6 +102,7 @@ class Info(Widget):
         info = [
             Panel(str(current_entity.pos)),
             Panel(f'hp: {current_entity.hp}'),
+            Panel(str(self.fft.turn_num)),
             *[Panel(action) for action in self.fft.available_actions(current_entity)]
         ]
         return Panel(Columns(info))

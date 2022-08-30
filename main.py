@@ -8,6 +8,9 @@ from character import Character
 from vector import Vec
 from ui import Map, Info
 
+def q():
+    ''' AI Quality function '''
+
 def run_model():
     def create_game():
         entities = [
@@ -29,8 +32,19 @@ def run_model():
     
     game.take_turn = record(game.take_turn)
 
+    # ai will take an input of bytes, the game state
+    # all characters will need to be converted to bytes
+    ai_in = game.encode()
+
+    # ai will output the action to take, along with what to perform the action on
+    # the action 0    0      0
+    #            move attack wait
+    # the pos    0     0
+    #            pos.x pos.y
     # run the model here, interacting with the game
-    for i in range(10):
+
+    # run for 50 turns or until the enemy is killed
+    while game.turn_num < 50 and len(game.entities) > 1:
         entity = game.current_turns_entity()
         try:
             game.take_turn('move', entity.pos + Vec(1, 1))

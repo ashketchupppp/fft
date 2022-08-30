@@ -20,7 +20,7 @@ class Vec:
     def __eq__(self, other):
         if type(other) == Vec:
             return self.x == other.x and self.y == other.y
-        return self == other
+        return False
 
 
     def __add__(self, other):

@@ -51,10 +51,10 @@ class TestFFT(unittest.TestCase):
         self.assertEqual(c1, entities[0])
         self.assertEqual(c1, game.entities.peek_next())
 
-        game.take_turn('move', Vec(1, 0))
+        game.take_turn(('move', (Vec(1, 0))))
         self.assertEqual(c2, game.entities.peek_next())
         self.assertEqual(game.entities[Vec(1, 0)], c1)
-        game.take_turn('attack', c1)
+        game.take_turn(('attack', (c1)))
         self.assertEqual(c1, game.entities.peek_next())
         self.assertEqual(c1.hp, c1.max_hp - c2.atk)
 
@@ -65,7 +65,7 @@ class TestFFT(unittest.TestCase):
         ]
         game = getGame(entities)
         with self.assertRaises(FFT.UnavailableAction):
-            game.take_turn('attack', entities[1])
+            game.take_turn(('attack', entities[1]))
 
     def test_wait_does_nothing_but_advances_game_turn(self):
         entities = [
@@ -74,7 +74,7 @@ class TestFFT(unittest.TestCase):
         ]
         game = getGame(entities)
         first_entity = game.current_turns_entity()
-        game.take_turn('wait', first_entity)
+        game.take_turn(('wait', first_entity))
         self.assertEqual(game.turn_num, 1)
         self.assertEqual(Vec(0, 0), first_entity.pos)
 
@@ -104,7 +104,26 @@ class TestFFT(unittest.TestCase):
         ]
         game = getGame(entities)
         with self.assertRaises(FFT.UnavailableAction):
-            game.take_turn('attack', entities[1])
+            game.take_turn(('attack', entities[1]))
+
+    def test_can_attack_and_move_in_one_turn(self):
+        c1 = Character(pos=Vec(0, 0), team=0, speed=2)
+        c2 = Character(pos=Vec(1, 1), team=1)
+        entities = [c1, c2]
+        game = getGame(entities)
+        self.assertEqual(game.current_turns_entity(), c1)
+        game.take_turn(('move', Vec(1, 0)), ('attack', entities[1]))
+        self.assertEqual(game.current_turns_entity(), c2)
+
+    def test_can_move_and_wait_in_one_turn(self):
+        c1 = Character(pos=Vec(0, 0), team=0, speed=2)
+        c2 = Character(pos=Vec(1, 1), team=1)
+        entities = [c1, c2]
+        game = getGame(entities)
+        self.assertEqual(game.current_turns_entity(), c1)
+        game.take_turn(('move', Vec(1, 0)), ('wait', entities[1]))
+        self.assertEqual(game.current_turns_entity(), c2)
+
 
 class TestCharacter(unittest.TestCase):
     def test_attack(self):
@@ -139,18 +158,18 @@ class TestCharacter(unittest.TestCase):
             Vec(0, -2)
         ]
         for vec in inRanges:
-            self.assertTrue(testCharacter.can_move(vec))
+            self.assertTrue(testCharacter.can_move_to(vec))
         for vec in outRanges:
-            self.assertFalse(testCharacter.can_move(vec))
+            self.assertFalse(testCharacter.can_move_to(vec))
     
     def test_cannot_move_diagonally(self):
         ranges = list(range(1, 4))
         testCharacter = Character(pos=Vec(0, 0), move_range=1)
         for r in ranges:
             testCharacter.move_range = r
-            self.assertTrue(testCharacter.can_move(Vec(r - 1, r - 1)))            
-            self.assertFalse(testCharacter.can_move(Vec(r, r)))
-            self.assertFalse(testCharacter.can_move(Vec(r + 1, r + 1)))
+            self.assertTrue(testCharacter.can_move_to(Vec(r - 1, r - 1)))            
+            self.assertFalse(testCharacter.can_move_to(Vec(r, r)))
+            self.assertFalse(testCharacter.can_move_to(Vec(r + 1, r + 1)))
 
 class TestVec(unittest.TestCase):
     def test_less_than(self):
