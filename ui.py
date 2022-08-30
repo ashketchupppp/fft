@@ -12,6 +12,7 @@ def pad_to_len(string, padlen, padchar = ' '):
     return string + (padchar * (len(string) - padlen))
 
 def joinr(joinstr, rich_text_list):
+    ''' Joins regular strings with a list of rich.text.Text objects '''
     final = Text('')
     for text in rich_text_list:
         final = final + Text(joinstr) + text
@@ -66,17 +67,20 @@ def draw_map(fft: FFT):
     # grid_slots = add_tiles(grid_slots, fft.map)
     grid_slots = add_characters(grid_slots, fft.entities)
 
-    # convert all to Text objects for highlighting
-    for y in range(len(grid_slots)):
-        for x in range(len(grid_slots[y])):
-            grid_slots[y][x] = Text(grid_slots[y][x])
-
-    # highlight current entity
+    # highlight current entity and its coordinates
     current_entity = fft.current_turns_entity()
     hy, hx = (current_entity.pos.y + 1, current_entity.pos.x + 1)
-    grid_slots[hy][hx].stylize('bold magenta')
-    grid_slots[0][hx].stylize('bold')
-    grid_slots[hy][0].stylize('bold')
+    grid_slots[hy][hx] = (grid_slots[hy][hx], 'bold magenta')
+    grid_slots[0][hx] = (grid_slots[0][hx], 'bold magenta')
+    grid_slots[hy][0] = (grid_slots[hy][0], 'bold magenta')
+
+    # highlight 
+
+    # highlight movement range
+    # ╭────╮
+    # │    │  
+    # ╰────╯
+
     return grid_slots
 
 class Map(Widget):
@@ -86,7 +90,7 @@ class Map(Widget):
 
     def render(self):
         map_tile2d = draw_map(self.fft)
-        return Panel(joinr('\n', [joinr('', row) for row in map_tile2d]))
+        return Panel(joinr('\n', [Text.assemble(*row) for row in map_tile2d]))
 
 class Info(Widget):
     def __init__(self, fft: FFT, *args):

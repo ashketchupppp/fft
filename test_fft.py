@@ -6,8 +6,8 @@ from vector import Vec
 
 def getEntities():
     return [
-        Character(Vec(0, 0), speed=2),
-        Character(Vec(1, 1), speed=1)
+        Character(Vec(0, 0), speed=2, team=0),
+        Character(Vec(1, 1), speed=1, team=1)
     ]
 
 def getGame(entities, w=10, h=10):
@@ -33,7 +33,7 @@ class TestFFT(unittest.TestCase):
         game = getGame(entities)
         new_pos = Vec(0, 2)
         original_pos = game.entities[0].pos.copy()
-        with self.assertRaises(Character.OutOfRange):
+        with self.assertRaises(Character.CannotMove):
             game.move_entity(game.entities[0], new_pos)
         self.assertEqual(game.entities[0].pos, original_pos)
 
@@ -67,40 +67,59 @@ class TestFFT(unittest.TestCase):
         with self.assertRaises(FFT.UnavailableAction):
             game.take_turn('attack', entities[1])
 
-    def test_available_actions(self):
+    def test_wait_does_nothing_but_advances_game_turn(self):
         entities = [
             Character(pos=Vec(0, 0), atk_range=1),
             Character(pos=Vec(10, 10), atk_range=100)
         ]
         game = getGame(entities)
-        self.assertEqual(game.available_actions(entities[0]), ['move'])
-        self.assertEqual(game.available_actions(entities[1]), ['move', 'attack'])
+        first_entity = game.current_turns_entity()
+        game.take_turn('wait', first_entity)
+        self.assertEqual(game.turn_num, 1)
+        self.assertEqual(Vec(0, 0), first_entity.pos)
+
+    def test_available_actions(self):
+        entities = [
+            Character(pos=Vec(0, 0), atk_range=1, team=0),
+            Character(pos=Vec(10, 10), atk_range=100, team=1)
+        ]
+        game = getGame(entities)
+        self.assertEqual(game.available_actions(entities[0]), ['wait', 'move'])
+        self.assertEqual(game.available_actions(entities[1]), ['wait', 'move', 'attack'])
          
     def test_character_dies_when_hp_0_or_below(self):
         entities = [
-            Character(pos=Vec(0, 0), atk_range=1, atk=5),
-            Character(pos=Vec(0, 1), hp=10)
+            Character(pos=Vec(0, 0), atk_range=1, atk=5, team=0),
+            Character(pos=Vec(0, 1), hp=10, team=1)
         ]
         game = getGame(entities)
         game.attack_entity(entities[0], entities[1])
         game.attack_entity(entities[0], entities[1])
         self.assertEqual(len(game.entities), 1)
 
+    def test_character_cannot_attack_own_teammembers(self):
+        entities = [
+            Character(pos=Vec(0, 0), team=0, speed=2),
+            Character(pos=Vec(0, 1), team=0)
+        ]
+        game = getGame(entities)
+        with self.assertRaises(FFT.UnavailableAction):
+            game.take_turn('attack', entities[1])
 
 class TestCharacter(unittest.TestCase):
     def test_attack(self):
         startingHp = 30
-        c1 = Character(pos=Vec(0, 0))
-        c2 = Character(hp=startingHp, pos=Vec(0, 1))
+        c1 = Character(pos=Vec(0, 0), team=1)
+        c2 = Character(hp=startingHp, pos=Vec(0, 1), team=0)
         c1.attack(c2)
         self.assertEqual(c2.hp, startingHp - c1.atk)
 
     def test_cannot_attack_out_of_range(self):
-        c = Character(pos=Vec(0, 1), atk_range=1)
-        inRangeChar = Character(pos=Vec(0, 0))
-        outRangeChar = Character(pos=Vec(2, 2))
+        c = Character(pos=Vec(0, 1), atk_range=1, team=2)
+        inRangeChar = Character(pos=Vec(0, 0), team=0)
+        outRangeChar = Character(pos=Vec(2, 2), team=1)
         c.attack(inRangeChar)
-        with self.assertRaises(Character.OutOfRange):
+        with self.assertRaises(Character.CannotAttack):
             c.attack(outRangeChar)
 
     def test_can_move(self):

@@ -34,6 +34,7 @@ class FFT:
     def __init__(self, map_w, map_h, entities: Entities):
         self.entities = Entities(entities)
         self.map = Map(map_w, map_h)
+        self.turn_num = 0
 
     def current_turns_entity(self) -> Character:
         return self.entities.peek_next()
@@ -57,6 +58,7 @@ class FFT:
             self.move_entity(entity, *args)
         elif action == 'attack':
             self.attack_entity(entity, *args)
+        self.turn_num += 1
 
     def entity_can_attack(self, entity):
         for i in range(len(self.entities)):
@@ -64,7 +66,7 @@ class FFT:
                 return True
 
     def available_actions(self, entity):
-        available_actions = []
+        available_actions = ['wait']
         if 'move' in entity.actions:
             available_actions.append('move')
         if 'attack' in entity.actions and self.entity_can_attack(entity):

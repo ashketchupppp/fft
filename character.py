@@ -1,5 +1,5 @@
 class Character:
-    def __init__(self, pos = None, hp = 30, atk = 10, move_range = 1, atk_range = 1, speed=1):
+    def __init__(self, pos = None, hp = 30, atk = 10, move_range = 1, atk_range = 1, speed=1, team=0):
         self.max_hp = hp
         self.hp = hp
         self.atk = atk
@@ -7,9 +7,11 @@ class Character:
         self.atk_range = atk_range
         self.pos = pos
         self.speed = speed
+        self.team = team
         self.actions = [
             'move',
-            'attack'
+            'attack',
+            'wait'
         ]
 
     def in_range(self, pos, _range):
@@ -19,19 +21,19 @@ class Character:
         return self.in_range(new_pos, self.move_range)
 
     def can_attack(self, entity):
-        return self.in_range(entity.pos, self.atk_range)
+        return self.in_range(entity.pos, self.atk_range) and self.team != entity.team
 
     def attack(self, other):
         if type(other) != Character:
             raise TypeError(f'invalid type {type(other)}')
         if not self.can_attack(other):
-            raise Character.OutOfRange('character out of range')
+            raise Character.CannotAttack()
         other.hp -= self.atk
 
     def move(self, pos):
         if not self.can_move(pos):
-            raise Character.OutOfRange(f'{pos} out of move range')
+            raise Character.CannotMove(f'{pos} out of move range')
         self.pos = pos 
 
-    class OutOfRange(Exception): pass
-    class DiagonalMovementError(Exception): pass
+    class CannotAttack(Exception): pass
+    class CannotMove(Exception): pass

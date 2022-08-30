@@ -11,8 +11,8 @@ from ui import Map, Info
 def run_model():
     def create_game():
         entities = [
-            Character(Vec(0, 0), move_range=2),
-            Character(Vec(5, 5), move_range=2)
+            Character(Vec(0, 0), move_range=2, team=0),
+            Character(Vec(5, 5), move_range=2, team=1)
         ]
         game = FFT(10, 10, entities)
         return game
